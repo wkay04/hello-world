@@ -2,15 +2,13 @@
 
 ## Quick Start - View on iPhone (Easiest!)
 
-**Option 1: Direct GitHub Link** (Recommended)
-1. After I commit the files, you can view the map directly on your iPhone by navigating to the raw HTML file on GitHub
-2. Open Safari on your iPhone and go to: `https://raw.githubusercontent.com/wkay04/hello-world/claude/ny-ad34-interactive-map-014gYAFtV5E6UMMt432YB1Vd/ny_ad34_map.html`
-3. The map will load instantly - no setup required!
+**Option 1: GitHub Pages** (Recommended - Already Enabled!)
+1. Open Safari on your iPhone
+2. Go to: `https://wkay04.github.io/hello-world/ny_ad34_map.html`
+3. The interactive map will load instantly!
+4. Tip: Bookmark it or add to your home screen for easy access
 
-**Option 2: GitHub Pages** (Best for sharing)
-- I can enable GitHub Pages which will give you a clean URL like: `https://wkay04.github.io/hello-world/ny_ad34_map.html`
-
-**Option 3: Download and Open Locally**
+**Option 2: Download and Open Locally**
 1. Download `ny_ad34_map.html` from GitHub to your computer
 2. Email it to yourself or save to iCloud Drive
 3. Open the file from your iPhone - it will open in Safari
