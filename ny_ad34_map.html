@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>NY Assembly District 34 Interactive Map</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="anonymous"/>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 250px;
+        }
+
+        .info-panel h2 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .info-panel p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 2000;
+            font-size: 16px;
+        }
+
+        .error {
+            color: #d9534f;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .info-panel {
+                top: auto;
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">Loading NY Assembly District 34...</div>
+    <div id="map"></div>
+
+    <div class="info-panel">
+        <h2>NY Assembly District 34</h2>
+        <p><strong>Location:</strong> New York State</p>
+        <p><strong>Map Type:</strong> OpenStreetMap</p>
+        <p id="status">Loading boundary data...</p>
+    </div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin="anonymous"></script>
+
+    <script>
+        // Initialize the map centered on NY AD 34 approximate location
+        // AD 34 is in the Brooklyn/Manhattan area
+        const map = L.map('map', {
+            center: [40.7589, -73.9851], // Manhattan/Brooklyn area
+            zoom: 12,
+            zoomControl: true,
+            scrollWheelZoom: true,
+            touchZoom: true,
+            doubleClickZoom: true
+        });
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19,
+            minZoom: 10
+        }).addTo(map);
+
+        // Try to load district boundary from Census Bureau TIGER/Line data
+        const apiUrl = 'https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_Legislative_Districts/MapServer/2/query';
+        const params = new URLSearchParams({
+            where: "STATE='36' AND BASENAME='34'", // NY state (FIPS 36), District 34
+            outFields: '*',
+            f: 'geojson',
+            returnGeometry: 'true',
+            spatialRel: 'esriSpatialRelIntersects'
+        });
+
+        const statusEl = document.getElementById('status');
+        const loadingEl = document.getElementById('loading');
+
+        // Fetch the district boundary
+        fetch(`${apiUrl}?${params}`)
+            .then(response => response.json())
+            .then(data => {
+                loadingEl.style.display = 'none';
+
+                if (data.features && data.features.length > 0) {
+                    // Add the district boundary to the map
+                    const districtLayer = L.geoJSON(data, {
+                        style: {
+                            fillColor: '#3388ff',
+                            fillOpacity: 0.3,
+                            color: '#0066cc',
+                            weight: 3,
+                            opacity: 1
+                        },
+                        onEachFeature: function(feature, layer) {
+                            // Calculate area in square kilometers
+                            const area = (L.GeometryUtil && L.GeometryUtil.geodesicArea)
+                                ? (L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]) / 1000000).toFixed(2)
+                                : 'N/A';
+
+                            const popupContent = `
+                                <strong>NY Assembly District 34</strong><br>
+                                <strong>District:</strong> ${feature.properties.BASENAME || '34'}<br>
+                                <strong>Name:</strong> ${feature.properties.NAME || 'State Assembly District 34'}<br>
+                                <strong>State:</strong> New York<br>
+                                ${area !== 'N/A' ? `<strong>Area:</strong> ${area} sq km<br>` : ''}
+                            `;
+
+                            layer.bindPopup(popupContent);
+
+                            // Highlight on hover
+                            layer.on('mouseover', function() {
+                                this.setStyle({
+                                    fillOpacity: 0.5,
+                                    weight: 4
+                                });
+                            });
+
+                            layer.on('mouseout', function() {
+                                this.setStyle({
+                                    fillOpacity: 0.3,
+                                    weight: 3
+                                });
+                            });
+                        }
+                    }).addTo(map);
+
+                    // Fit map to district boundaries
+                    map.fitBounds(districtLayer.getBounds(), {
+                        padding: [50, 50]
+                    });
+
+                    statusEl.innerHTML = '✓ Boundary loaded';
+                    statusEl.style.color = '#5cb85c';
+                } else {
+                    // Fallback: Show general area marker
+                    statusEl.innerHTML = 'Showing approximate location';
+                    statusEl.style.color = '#f0ad4e';
+
+                    L.marker([40.7589, -73.9851])
+                        .addTo(map)
+                        .bindPopup('<strong>NY Assembly District 34</strong><br>Approximate location')
+                        .openPopup();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading district data:', error);
+                loadingEl.style.display = 'none';
+                statusEl.innerHTML = 'Using fallback location';
+                statusEl.className = 'error';
+
+                // Fallback: Show a marker at approximate location
+                L.marker([40.7589, -73.9851])
+                    .addTo(map)
+                    .bindPopup('<strong>NY Assembly District 34</strong><br>Approximate location<br><em>Boundary data unavailable</em>')
+                    .openPopup();
+            });
+
+        // Add scale control
+        L.control.scale({
+            position: 'bottomleft',
+            imperial: true,
+            metric: true
+        }).addTo(map);
+
+        // Optional: Add current location button for mobile
+        if ('geolocation' in navigator) {
+            const locationButton = L.control({position: 'topleft'});
+            locationButton.onAdd = function() {
+                const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                div.innerHTML = '<a href="#" title="My Location" style="font-size:18px; line-height:30px; width:30px; height:30px; display:block; text-align:center; text-decoration:none; color:#000;">📍</a>';
+                div.onclick = function(e) {
+                    e.preventDefault();
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        map.setView([position.coords.latitude, position.coords.longitude], 13);
+                        L.marker([position.coords.latitude, position.coords.longitude])
+                            .addTo(map)
+                            .bindPopup('You are here')
+                            .openPopup();
+                    });
+                };
+                return div;
+            };
+            locationButton.addTo(map);
+        }
+    </script>
+</body>
+</html>
