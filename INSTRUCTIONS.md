@@ -1,13 +1,45 @@
 # NY Assembly District 34 Interactive Map
 
+## Quick Start - View on iPhone (Easiest!)
+
+**Option 1: Direct GitHub Link** (Recommended)
+1. After I commit the files, you can view the map directly on your iPhone by navigating to the raw HTML file on GitHub
+2. Open Safari on your iPhone and go to: `https://raw.githubusercontent.com/wkay04/hello-world/claude/ny-ad34-interactive-map-014gYAFtV5E6UMMt432YB1Vd/ny_ad34_map.html`
+3. The map will load instantly - no setup required!
+
+**Option 2: GitHub Pages** (Best for sharing)
+- I can enable GitHub Pages which will give you a clean URL like: `https://wkay04.github.io/hello-world/ny_ad34_map.html`
+
+**Option 3: Download and Open Locally**
+1. Download `ny_ad34_map.html` from GitHub to your computer
+2. Email it to yourself or save to iCloud Drive
+3. Open the file from your iPhone - it will open in Safari
+
+## Files Included
+
+1. **ny_ad34_map.html** - Standalone HTML map (works immediately, no R needed!)
+2. **ny_ad34_interactive_map.R** - R script version (for advanced users)
+
 ## Description
-This R script creates an interactive, zoomable map of New York Assembly District 34 using OpenStreetMap tiles.
+Two versions available:
+- **HTML version**: Ready to use immediately on any device including iPhone
+- **R script version**: Creates an interactive, zoomable map of New York Assembly District 34 using OpenStreetMap tiles
 
 ## Features
-- **Interactive**: Click and drag to pan, scroll to zoom
+
+### HTML Version (ny_ad34_map.html)
+- **Works on iPhone/iPad**: Optimized for mobile Safari
+- **No installation required**: Just open in any browser
+- **Interactive**: Touch to pan, pinch to zoom
 - **OpenStreetMap tiles**: Detailed street-level mapping
-- **District boundaries**: Clearly marked AD 34 boundaries
-- **Popup information**: Click on the district to see details
+- **Live boundary data**: Fetches official district boundaries from US Census
+- **Location button**: Find your current location (on mobile)
+- **Popup information**: Tap on the district to see details
+- **Fully responsive**: Works on any screen size
+
+### R Script Version (ny_ad34_interactive_map.R)
+- **Offline capable**: Downloads district data locally
+- **Customizable**: Modify the R code for different districts
 - **HTML export**: Generates a standalone HTML file you can share
 
 ## Required R Packages
